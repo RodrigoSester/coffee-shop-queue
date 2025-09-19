@@ -1,0 +1,42 @@
+{
+  "name": "coffee-shop-queue",
+  "version": "1.0.0",
+  "description": "Coffee shop order queue system using Lambda, MongoDB, and SQS",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "serverless deploy",
+    "remove": "serverless remove",
+    "offline": "serverless offline",
+    "dev": "serverless offline --host 0.0.0.0",
+    "docker:build": "docker build -t coffee-shop-queue:latest .",
+    "docker:build-tagged": "docker build -t coffee-shop-queue:v1.0.0 -t coffee-shop-queue:latest .",
+    "docker:up": "docker-compose up",
+    "docker:up-build": "docker-compose up --build",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f app",
+    "docker:clean": "docker-compose down -v --rmi all",
+    "docker:images": "docker images | grep coffee-shop-queue",
+    "docker:save": "docker save coffee-shop-queue:latest -o coffee-shop-queue.tar",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "coffee",
+    "queue",
+    "lambda",
+    "mongodb",
+    "sqs"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1692.0",
+    "dotenv": "^17.2.2",
+    "mongodb": "^6.20.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "serverless": "^3.35.0",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-offline": "^13.2.0"
+  }
+}

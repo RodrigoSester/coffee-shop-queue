@@ -1,0 +1,63 @@
+service: coffee-shop-queue
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  deploymentBucket:
+    name: ${env:DEPLOYMENT_BUCKET, 'coffee-shop-build'}
+    versioning: true
+    serverSideEncryption: AES256
+  environment:
+    MONGODB_URI: ${env:MONGODB_URI}
+    NODE_ENV: ${self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sqs:SendMessage
+        - sqs:ReceiveMessage
+        - sqs:DeleteMessage
+        - sqs:GetQueueAttributes
+      Resource: !GetAtt OrderQueue.Arn
+
+functions:
+  createOrder:
+    handler: src/functions/createOrder.handler
+    events:
+      - http:
+          path: orders
+          method: post
+          cors: true
+    environment:
+      QUEUE_URL: !Ref OrderQueue
+
+  processOrder:
+    handler: src/functions/processOrder.handler
+    events:
+      - sqs:
+          arn: !GetAtt OrderQueue.Arn
+          batchSize: 1
+    environment:
+      QUEUE_URL: !Ref OrderQueue
+
+resources:
+  Resources:
+    OrderQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:service}-${self:provider.stage}-orders
+        VisibilityTimeoutSeconds: 300
+        MessageRetentionPeriod: 1209600
+
+  Outputs:
+    QueueUrl:
+      Value: !Ref OrderQueue
+      Export:
+        Name: ${self:service}-${self:provider.stage}-queue-url
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-offline
